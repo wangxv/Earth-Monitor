@@ -5,7 +5,7 @@
   "main": "dist/earth-monitor.umd.js",
   "module": "dist/earth-monitor.es.js",
   "scripts": {
-    "build": "rollup -c rollup.config.js --bundleConfigAsCjs",
+    "build": "rollup -c rollup.config.js --bundleConfigAsCjs && typedoc --options typedoc.json",
     "lint": "tslint --project tsconfig.json -t codeFrame 'src/**/*.ts'",
     "clear": "rimraf dist",
     "commit": "git-cz",

@@ -1,3 +1,6 @@
+/**
+ * 事件处理
+ */
 export declare class EventModule {
     protected _evt: {};
     $on(type: any, fn: any): void;

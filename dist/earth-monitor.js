@@ -89,14 +89,19 @@
         return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
     };
 
+    /**
+     * 事件处理
+     */
     var EventModule = /** @class */ (function () {
         function EventModule() {
             this._evt = {};
         }
+        // 订阅者-监听事件的触发
         EventModule.prototype.$on = function (type, fn) {
             this._evt[type] = this._evt[type] || [];
             this._evt[type].push(fn);
         };
+        // 发布者-触发事件
         EventModule.prototype.$emit = function (type) {
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -109,6 +114,7 @@
                 });
             }
         };
+        // 关闭某个事件监听
         EventModule.prototype.$off = function (type, fn) {
             var handlers = this._evt[type] || [];
             if (fn) {
@@ -119,6 +125,7 @@
                 this._evt[type] = [];
             }
         };
+        // 全部移除
         EventModule.prototype.$remove = function () {
             this._evt = {};
         };
@@ -222,6 +229,7 @@
         }
         return "unknow";
     };
+    // header信息转为json对象
     function headerToJson(headers) {
         var arr = headers.trim().split(/[\r\n]+/);
         var json = {};
@@ -239,8 +247,17 @@
     var POP_STATE = 'popstate';
     var PROMISE_ERROR = 'promiseError';
 
+    /**
+     * 白屏异常监控逻辑处理
+     */
     var blankScreen = (function (ctx) {
         var __flag = false;
+        /**
+         * 判断页面是否白屏
+         * @param dom dom对象
+         * @param num 次数
+         * @returns 无
+         */
         function isWhite(dom, num) {
             if (!dom)
                 return false;
@@ -308,6 +325,12 @@
         });
     });
 
+    /**
+     * 判断异常信息是否在异常白名单中，如果在不上报
+     * @param scriptErrorWhite 异常白名单
+     * @param errorMessage 异常信息
+     * @returns 是否在异常白名单中
+     */
     var judeScriptErrorWhite = function (scriptErrorWhite, errorMessage) {
         var ignore = false;
         try {
@@ -332,6 +355,7 @@
         }
         return ignore;
     };
+    // 生成时间戳
     var timeStamp = function () {
         return new Date().getTime();
     };
@@ -347,7 +371,7 @@
                     case 0:
                         _a = ctx.options, client = _a.client, ua = _a.ua, system = _a.system, device = _a.device;
                         data = {
-                            reportType: "openPage" /* REPORT_TYPE.openPage */,
+                            type: "openPage" /* REPORT_TYPE.openPage */,
                             client: client,
                             ua: ua,
                             system: system,
@@ -394,7 +418,7 @@
             if (!((browser === 'chrome' || browser === 'safari') && routerMode === 'history')) {
                 // chrome, safari 浏览器中popstate首次进入就会触发
                 ctx.report({
-                    reportType: "pageView" /* REPORT_TYPE.pageView */
+                    type: "pageView" /* REPORT_TYPE.pageView */
                 });
             }
         });
@@ -402,14 +426,14 @@
             if (routerMode === 'hash') {
                 ctx.$on(HASH_CHANGE, function () {
                     ctx.report({
-                        reportType: "pageView" /* REPORT_TYPE.pageView */
+                        type: "pageView" /* REPORT_TYPE.pageView */
                     });
                 });
             }
             if (routerMode === 'history') {
                 ctx.$on(POP_STATE, function () {
                     ctx.report({
-                        reportType: "pageView" /* REPORT_TYPE.pageView */
+                        type: "pageView" /* REPORT_TYPE.pageView */
                     });
                 });
             }
@@ -417,7 +441,7 @@
             // pushState, replaceState触发事件
             ctx.$on(HISTORY_STATE_CHANGE, function () {
                 ctx.report({
-                    reportType: "pageView" /* REPORT_TYPE.pageView */
+                    type: "pageView" /* REPORT_TYPE.pageView */
                 });
             });
         }
@@ -610,6 +634,9 @@
     var processHooks = function (hooks, ctx) {
         return Promise.all(hooks.map(function (hook) { return hook.call(null, ctx); }));
     };
+    /**
+     * EarthMonitor处理监控
+     */
     var EarthMonitor = /** @class */ (function (_super) {
         __extends(EarthMonitor, _super);
         function EarthMonitor(options) {
@@ -622,6 +649,13 @@
             _this_1._isCaptured = false;
             return _this_1;
         }
+        /**
+         * 开始执行
+         * 1、判断项目唯一标识是否传入
+         * 2、执行beforStart
+         * 3、初始化hooks
+         * 4、执行hooks
+         */
         EarthMonitor.prototype.start = function () {
             return __awaiter(this, void 0, void 0, function () {
                 var res, e_1;
@@ -659,6 +693,11 @@
                 });
             });
         };
+        /**
+         * 上报数据
+         * @param data 上报数据
+         * @returns 无
+         */
         EarthMonitor.prototype.report = function (data) {
             try {
                 if (!this._isReady) {
@@ -672,6 +711,15 @@
                 console.log(e);
             }
         };
+        /**
+         * 上报异常
+         * 1、根据targetName分类，执行异常还是资源异常
+         * 2、资源异常上报type： sourceError
+         * 3、执行异常上报type: jsError
+         * @param err Error对象
+         * @param options 参数
+         * @returns 无
+         */
         EarthMonitor.prototype.reportError = function (err, options) {
             return __awaiter(this, void 0, void 0, function () {
                 var target, url, data, isIgnore, data;
@@ -690,7 +738,7 @@
                                 requestUrl: url && url.split('?')[0],
                                 resourceType: target.tagName.toLowerCase()
                             };
-                            return [4 /*yield*/, this.report(__assign(__assign({}, data), { reportType: "sourceError" /* REPORT_TYPE.sourceError */ }))];
+                            return [4 /*yield*/, this.report(__assign(__assign({}, data), { type: "sourceError" /* REPORT_TYPE.sourceError */ }))];
                         case 1:
                             _a.sent();
                             return [3 /*break*/, 4];
@@ -705,7 +753,7 @@
                                 errorMessage: err.message,
                                 errorStack: err.stack
                             };
-                            return [4 /*yield*/, this.report(__assign(__assign(__assign({}, data), { reportType: "jsError" /* REPORT_TYPE.jsError */ }), options))];
+                            return [4 /*yield*/, this.report(__assign(__assign(__assign({}, data), { type: "jsError" /* REPORT_TYPE.jsError */ }), options))];
                         case 3:
                             _a.sent();
                             _a.label = 4;
@@ -714,6 +762,10 @@
                 });
             });
         };
+        /**
+         * 捕获vue异常
+         * @param Vue vue
+         */
         EarthMonitor.prototype.captureVueError = function (Vue) {
             // @ts-ignore
             Vue = Vue || window.Vue;
@@ -729,6 +781,10 @@
                 this._isCaptured = true;
             }
         };
+        /**
+         * 安装探针
+         * @param plugins 探针列表
+         */
         EarthMonitor.prototype.install = function (plugins) {
             this.options.plugins = plugins;
             this.start().catch(function (e) {
@@ -748,6 +804,7 @@
             ];
             this.install(plugins);
         };
+        // 卸载探针
         EarthMonitor.prototype.uninstall = function () {
             this.options.plugins = [];
             this._isReady = false;

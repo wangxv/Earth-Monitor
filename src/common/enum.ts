@@ -1,3 +1,4 @@
+// 上报类型
 export const enum REPORT_TYPE {
   openPage = 'openPage', // 页面启动
   pageView = 'pageView',
@@ -20,6 +21,7 @@ export const SUCCESS_CODE = [200]
 
 export const H5_LOAD_END = 'h5LoadEnd';
 
+// 探针类型
 export const enum PLUGINS {
   OPEN_PAGE = 'openPage',
   PAGE_VIEW = 'pageView',

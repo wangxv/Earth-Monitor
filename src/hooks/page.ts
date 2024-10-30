@@ -9,7 +9,7 @@ export const openPage = (ctx) => {
   const openPageHandler = async () => {
     const {client, ua, system, device} = ctx.options;
     const data = {
-      reportType: REPORT_TYPE.openPage,
+      type: REPORT_TYPE.openPage,
       client,
       ua,
       system,
@@ -55,7 +55,7 @@ export const pageView =  (ctx) => {
     if (!((browser === 'chrome' || browser === 'safari') && routerMode === 'history')) {
       // chrome, safari 浏览器中popstate首次进入就会触发
       ctx.report({
-        reportType: REPORT_TYPE.pageView
+        type: REPORT_TYPE.pageView
       });
     }
   })
@@ -64,7 +64,7 @@ export const pageView =  (ctx) => {
     if (routerMode === 'hash') {
       ctx.$on(HASH_CHANGE, () => {
         ctx.report({
-          reportType: REPORT_TYPE.pageView
+          type: REPORT_TYPE.pageView
         });
       });
     }
@@ -72,7 +72,7 @@ export const pageView =  (ctx) => {
     if (routerMode === 'history') {
       ctx.$on(POP_STATE, () => {
         ctx.report({
-          reportType: REPORT_TYPE.pageView
+          type: REPORT_TYPE.pageView
         });
       });
     }
@@ -82,7 +82,7 @@ export const pageView =  (ctx) => {
     // pushState, replaceState触发事件
     ctx.$on(HISTORY_STATE_CHANGE, () => {
       ctx.report({
-        reportType: REPORT_TYPE.pageView
+        type: REPORT_TYPE.pageView
       });
     });
   }

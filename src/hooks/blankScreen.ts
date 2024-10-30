@@ -1,9 +1,18 @@
 import { REPORT_TYPE, WINDOW_ONLOAD } from "../common/enum"
 
+/**
+ * 白屏异常监控逻辑处理
+ */
 export default (ctx) => {
 
   let __flag = false;
 
+  /**
+   * 判断页面是否白屏
+   * @param dom dom对象
+   * @param num 次数
+   * @returns 无
+   */
  function isWhite(dom: any, num: number) {
   if (!dom) return false;
 

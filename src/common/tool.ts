@@ -96,6 +96,7 @@ export const getBrowser = () => {
   return `unknow`;
 }
 
+// 判断浏览器类型
 export function judgeBrand() {
   const brands = [
     {
@@ -147,6 +148,8 @@ export function judgeBrand() {
   return '';
 }
 
+
+// header信息转为json对象
 export function headerToJson(headers) {
   const arr = headers.trim().split(/[\r\n]+/);
   const json: any = {};

@@ -21,6 +21,9 @@ const processHooks = (hooks, ctx) => {
   return Promise.all(hooks.map((hook) => hook.call(null, ctx)))
 }
 
+/**
+ * EarthMonitor处理监控
+ */
 class EarthMonitor extends EventModule{
   options: Options;
   startHooks = Array<Func>;
@@ -40,6 +43,13 @@ class EarthMonitor extends EventModule{
     this._isCaptured = false;
   }
 
+  /**
+   * 开始执行
+   * 1、判断项目唯一标识是否传入
+   * 2、执行beforStart
+   * 3、初始化hooks
+   * 4、执行hooks
+   */
   async start() {
     try {
       if (!this.options?.projectId) {
@@ -62,6 +72,11 @@ class EarthMonitor extends EventModule{
     }
   }
 
+  /**
+   * 上报数据
+   * @param data 上报数据
+   * @returns 无
+   */
   report (data) {
     try {
       if (!this._isReady) {
@@ -78,6 +93,15 @@ class EarthMonitor extends EventModule{
     }
   }
 
+  /**
+   * 上报异常
+   * 1、根据targetName分类，执行异常还是资源异常
+   * 2、资源异常上报type： sourceError
+   * 3、执行异常上报type: jsError
+   * @param err Error对象
+   * @param options 参数
+   * @returns 无
+   */
   async reportError(err, options?) {
     if (CheckType.isString(err) || CheckType.isNumber(err)) return;
 
@@ -94,7 +118,7 @@ class EarthMonitor extends EventModule{
         resourceType: target.tagName.toLowerCase()
       };
 
-      await this.report({...data, reportType: REPORT_TYPE.sourceError});
+      await this.report({...data, type: REPORT_TYPE.sourceError});
     } else {
       // js执行错误
 
@@ -109,11 +133,15 @@ class EarthMonitor extends EventModule{
           errorMessage: err.message,
           errorStack: err.stack
         };
-        await this.report({...data, reportType: REPORT_TYPE.jsError, ...options});
+        await this.report({...data, type: REPORT_TYPE.jsError, ...options});
       }
     }
   }
 
+  /**
+   * 捕获vue异常
+   * @param Vue vue
+   */
   captureVueError(Vue?) {
     // @ts-ignore
     Vue = Vue || window.Vue
@@ -130,6 +158,10 @@ class EarthMonitor extends EventModule{
     }
   }
 
+  /**
+   * 安装探针
+   * @param plugins 探针列表
+   */
   install (plugins) {
     this.options.plugins = plugins;
     this.start().catch(e => {
@@ -152,6 +184,7 @@ class EarthMonitor extends EventModule{
     this.install(plugins);
   }
 
+  // 卸载探针
   uninstall() {
     this.options.plugins = [];
     this._isReady = false;
